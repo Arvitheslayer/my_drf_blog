@@ -1,8 +1,8 @@
-from rest_framework import permissions, viewsets
+from rest_framework import permissions, viewsets, filters
 from rest_framework.response import Response
 
 from .models import Post
-from .serializers import PostSerializer, ContactSerailizer
+from .serializers import PostSerializer, ContactSerailizer, UserSerializer, RegisterSerializer
 from rest_framework import pagination
 from rest_framework import generics
 from .serializers import TagSerializer
@@ -17,6 +17,8 @@ class PageNumberSetPagination(pagination.PageNumberPagination):
     ordering = 'created_at'
 
 class PostViewSet(viewsets.ModelViewSet):
+    search_fields = ['content', 'h1']
+    filter_backends = (filters.SearchFilter,)
     serializer_class = PostSerializer
     queryset = Post.objects.all()
     lookup_field = 'slug'
@@ -58,3 +60,25 @@ class FeedBackView(APIView):
             message = data.get('message')
             send_mail(f'От {name} | {subject}', message, from_email, ['arvitheslayer9@gmail.com'])
             return Response({"success": "Sent"})
+
+class RegisterView(generics.GenericAPIView):
+    permission_classes = [permissions.AllowAny]
+    serializer_class = RegisterSerializer
+
+    def post(self, request, *args,  **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        return Response({
+            "user": UserSerializer(user, context=self.get_serializer_context()).data,
+            "message": "Пользователь успешно создан",
+        })
+
+class ProfileView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = UserSerializer
+
+    def get(self, request, *args,  **kwargs):
+        return Response({
+            "user": UserSerializer(request.user, context=self.get_serializer_context()).data,
+        })
