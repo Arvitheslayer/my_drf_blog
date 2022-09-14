@@ -1,8 +1,7 @@
 from rest_framework import permissions, viewsets, filters
 from rest_framework.response import Response
-
-from .models import Post
-from .serializers import PostSerializer, ContactSerailizer, UserSerializer, RegisterSerializer
+from .models import Post, Comment
+from .serializers import PostSerializer, ContactSerailizer, UserSerializer, RegisterSerializer, CommentSerializer
 from rest_framework import pagination
 from rest_framework import generics
 from .serializers import TagSerializer
@@ -82,3 +81,13 @@ class ProfileView(generics.GenericAPIView):
         return Response({
             "user": UserSerializer(request.user, context=self.get_serializer_context()).data,
         })
+
+class CommentView(generics.ListCreateAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        post_slug = self.kwargs['post_slug'].lower()
+        post = Post.objects.get(slug=post_slug)
+        return Comment.objects.filter(post=post)
