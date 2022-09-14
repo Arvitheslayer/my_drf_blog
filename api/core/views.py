@@ -3,6 +3,7 @@ from .models import Post
 from .serializers import PostSerializer
 from rest_framework import pagination
 from rest_framework import generics
+from .serializers import TagSerializer
 from taggit.models import Tag
 
 class PageNumberSetPagination(pagination.PageNumberPagination):
@@ -27,3 +28,8 @@ class TagDetailView(generics.ListAPIView):
         tag_slug = self.kwargs['tag_slug'].lower()
         tag = Tag.objects.get(slug=tag_slug)
         return Post.objects.filter(tags=tag)
+
+class TagView(generics.ListAPIView):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+    permission_classes = [permissions.AllowAny]
