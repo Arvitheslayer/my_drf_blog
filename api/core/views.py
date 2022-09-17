@@ -45,20 +45,7 @@ class AsideView(generics.ListAPIView):
     serializer_class = PostSerializer
     permission_classes = [permissions.AllowAny]
 
-class FeedBackView(APIView):
-    permission_classes = [permissions.AllowAny]
-    serializer_class = ContactSerailizer
 
-    def post(self, request, *args, **kwargs):
-        serializer_class = ContactSerailizer(data=request.data)
-        if serializer_class.is_valid():
-            data = serializer_class.validated_data
-            name = data.get('name')
-            from_email = data.get('email')
-            subject = data.get('subject')
-            message = data.get('message')
-            send_mail(f'От {name} | {subject}', message, from_email, ['arvitheslayer9@gmail.com'])
-            return Response({"success": "Sent"})
 
 class RegisterView(generics.GenericAPIView):
     permission_classes = [permissions.AllowAny]
